@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `MechanismMonitorCallback`, a mechanism-driven monitor for preemptive detection of training instability (adapted from arXiv:2606.28116). It attaches forward hooks to attention (`w_q`/`w_k`) and MoE router modules and records the QK bilinear spectral entropy (`preemptive/attn/qk_spectral_entropy`) and expert-load routing entropy (`preemptive/moe/routing_entropy`), each with a one-sided rolling-baseline anomaly flag that fires before loss/grad-norm spikes surface. Complements the reactive `StabilityMonitorCallback`; disabled by default in the example config.
 - Added `max_checkpoints` parameter to `CheckpointerCallback` (default: 3) to limit the number of permanent checkpoints retained. Oldest checkpoints are removed automatically when the limit is exceeded. Set to `None` to keep all (previous behavior).
 - Added `OutputDiscardCheckpoint`, an activation-recompute primitive for cases where the output of a checkpointed region dominates memory rather than its intermediates (e.g. precision casts, FFN up-projections). Forward runs under `no_grad`, the output's storage can be freed after downstream consumption, and a backward hook recomputes and rebinds the freed storage in place via a C++ `share_storage` extension (with a Python fallback for environments without a C++ toolchain).
 - Added Qwen3.5 dense model configs (0.8B, 4B, 9B, 27B) with hybrid Gated DeltaNet + full-attention architecture.
