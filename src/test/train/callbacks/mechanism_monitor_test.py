@@ -1,3 +1,4 @@
+# CPU: detector logic, hook wiring, QK/router entropy on tiny CPU modules.
 import math
 from types import SimpleNamespace
 
