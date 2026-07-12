@@ -34,6 +34,7 @@ from typing import Any, Deque, Dict, List, Optional, Tuple
 
 import torch
 
+from ...doc_utils import beta_feature
 from ..common import ReduceType
 from .callback import Callback
 
@@ -79,6 +80,7 @@ class _EntropyDropDetector:
         return z_score, z_score > self.threshold_std
 
 
+@beta_feature
 @dataclass
 class MechanismMonitorCallback(Callback):
     """
