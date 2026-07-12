@@ -169,7 +169,9 @@ def test_gqa_indivisible_head_count_returns_nan():
     q_lin = torch.randn(batch, seq, 3 * head_dim)
     k_lin = torch.randn(batch, seq, 2 * head_dim)
 
-    entropy = callback._qk_spectral_entropy(q_lin, k_lin, n_heads=3, n_kv_heads=2, head_dim=head_dim)
+    entropy = callback._qk_spectral_entropy(
+        q_lin, k_lin, n_heads=3, n_kv_heads=2, head_dim=head_dim
+    )
 
     assert math.isnan(entropy)
 
@@ -182,7 +184,10 @@ def test_layer_subsampling_caps_monitored_hooks():
         def __init__(self, n_layers: int):
             super().__init__()
             self.layers = nn.ModuleList(
-                [Attention(d_model=32, n_heads=4, n_kv_heads=2, bias=False) for _ in range(n_layers)]
+                [
+                    Attention(d_model=32, n_heads=4, n_kv_heads=2, bias=False)
+                    for _ in range(n_layers)
+                ]
             )
 
         def forward(self, x):
