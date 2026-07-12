@@ -35,6 +35,10 @@ on:
         description: 'Optional hand-crafted implementation spec (landing-zone-to-PR mode). Overrides suggested_experiment.'
         required: false
         default: ''
+      start-from-ref:
+        description: 'Optional branch/tag/SHA to start the coding session from (REMYX-219 refinement mode).'
+        required: false
+        default: ''
 
 jobs:
   recommend:
@@ -62,7 +66,7 @@ jobs:
           if [ -n "$MODEL_INPUT" ]; then
             echo "ANTHROPIC_MODEL=$MODEL_INPUT" >> "$GITHUB_ENV"
           fi
-      - uses: remyxai/outrider@v1
+      - uses: remyxai/outrider@feat/start-from-ref
         with:
           interest-id: 734a06d2-84c0-4b3f-bb5f-d0ab476b36a9
           rate-limit-days: '0'
@@ -71,4 +75,5 @@ jobs:
           claude-timeout: ${{ inputs.claude-timeout }}
           lead-content: ${{ inputs.lead-content }}
           publish: ${{ inputs.publish }}
+          start-from-ref: ${{ inputs.start-from-ref }}
           model-base-url: ${{ inputs.provider == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
