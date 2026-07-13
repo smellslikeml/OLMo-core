@@ -1,13 +1,17 @@
 name: Outrider
 
 on:
+  # Continuous-mode cron. Fires every 15 min; concurrency group serializes
+  # so only one Outrider dispatch runs at a time per fork.
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       provider:
         description: 'Which model provider to route Claude Code at.'
         type: choice
         required: false
-        default: 'anthropic'
+        default: 'zai'
         options:
           - anthropic
           - zai
@@ -24,9 +28,9 @@ on:
         required: false
         default: ''
       publish:
-        description: 'pr (default) or branch — branch mode pushes without opening PR/Issue.'
+        description: 'pr or branch (default). branch mode pushes without opening PR/Issue — cheap continuous-mode default.'
         required: false
-        default: 'pr'
+        default: 'branch'
       claude-timeout:
         description: 'Wall-clock seconds for the Claude Code agent calls.'
         required: false
@@ -36,9 +40,21 @@ on:
         required: false
         default: ''
       start-from-ref:
-        description: 'Optional branch/tag/SHA to start the coding session from (REMYX-219 refinement mode).'
+        description: 'Optional branch/tag/SHA to start the coding session from.'
         required: false
         default: ''
+      staged-synthesis:
+        description: 'When true, run the research phase to enrich the coding session with HF Hub linkage + sibling impls.'
+        required: false
+        default: 'false'
+      maintain-state:
+        description: 'When true, read + write .remyx/repo_intel.yaml on the fork to accumulate cross-run learning.'
+        required: false
+        default: 'true'
+
+concurrency:
+  group: outrider-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   recommend:
@@ -56,9 +72,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY_SECRET: ${{ secrets.ANTHROPIC_API_KEY }}
           ZAI_API_KEY_SECRET: ${{ secrets.ZAI_API_KEY }}
-          MODEL_INPUT: ${{ inputs.model }}
+          MODEL_INPUT: ${{ inputs.model || '' }}
+          PROVIDER: ${{ inputs.provider || 'zai' }}
         run: |
-          if [ "${{ inputs.provider }}" = "zai" ]; then
+          if [ "$PROVIDER" = "zai" ]; then
             echo "ANTHROPIC_AUTH_TOKEN=$ZAI_API_KEY_SECRET" >> "$GITHUB_ENV"
           else
             echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY_SECRET" >> "$GITHUB_ENV"
@@ -70,10 +87,12 @@ jobs:
         with:
           interest-id: 734a06d2-84c0-4b3f-bb5f-d0ab476b36a9
           rate-limit-days: '0'
-          search-method: ${{ inputs.search-method }}
-          pin-arxiv: ${{ inputs.pin-arxiv }}
-          claude-timeout: ${{ inputs.claude-timeout }}
-          lead-content: ${{ inputs.lead-content }}
-          publish: ${{ inputs.publish }}
-          start-from-ref: ${{ inputs.start-from-ref }}
-          model-base-url: ${{ inputs.provider == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
+          search-method: ${{ inputs.search-method || '' }}
+          pin-arxiv: ${{ inputs.pin-arxiv || '' }}
+          claude-timeout: ${{ inputs.claude-timeout || '900' }}
+          lead-content: ${{ inputs.lead-content || '' }}
+          start-from-ref: ${{ inputs.start-from-ref || '' }}
+          publish: ${{ inputs.publish || 'branch' }}
+          staged-synthesis: ${{ inputs.staged-synthesis || 'false' }}
+          maintain-state: ${{ inputs.maintain-state || 'true' }}
+          model-base-url: ${{ (inputs.provider || 'zai') == 'zai' && 'https://api.z.ai/api/anthropic' || '' }}
