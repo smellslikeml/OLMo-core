@@ -1,0 +1,16 @@
+schema_version: 1
+fork: smellslikeml/OLMo-core
+observed_landing_zones:
+- path: src/olmo_core/nn/moe/
+  shape_tags:
+  - unclassified
+  confirmed_by:
+  - arxiv: 2607.08601v1
+    mode: ''
+    call_site_specifics: ''
+    branch: it-takes-a-maestro-to-prune-bad-experts
+    timestamp: '2026-07-13T23:24:03Z'
+  last_observed: '2026-07-13T23:24:03Z'
+rejected_shapes: []
+coordination_signals: []
+last_updated: '2026-07-13T23:24:03Z'
