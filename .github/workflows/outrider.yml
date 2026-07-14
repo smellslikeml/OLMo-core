@@ -1,10 +1,11 @@
 name: Outrider
 
 on:
-  # Continuous-mode cron. Fires every 15 min; concurrency group serializes
-  # so only one Outrider dispatch runs at a time per fork.
-  schedule:
-    - cron: '*/15 * * * *'
+  # Continuous-mode cron disabled — pool saturated after 2 dispatches
+  # (see run #29294067904: skipped_by_selection_verification, all candidates
+  # failed integration-shape gates). Rotate to lm-evaluation-harness.
+  # schedule:
+  #   - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       provider:
