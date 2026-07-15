@@ -41,6 +41,7 @@ from olmo_core.train.callbacks import (
     GAPMonitorCallback,
     GPUMemoryMonitorCallback,
     LMEvaluatorCallbackConfig,
+    MechanismMonitorCallback,
     ProfilerCallback,
     WandBCallback,
 )
@@ -251,6 +252,12 @@ def build_config(opts, overrides: List[str]) -> ExperimentConfig:
         .with_callback(
             "gap_monitor",
             GAPMonitorCallback(enabled=False, dump_gradients=False),
+        )
+        # Preemptive, mechanism-driven stability signals (QK spectral entropy and
+        # MoE routing entropy). Disabled by default; set enabled=True to opt in.
+        .with_callback(
+            "mechanism_monitor",
+            MechanismMonitorCallback(enabled=False),
         )
     )
 
